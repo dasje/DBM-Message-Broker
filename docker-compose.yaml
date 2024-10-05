@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  database:
+    image: "postgres:latest"
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    env_file:
+      - .env
+    networks:
+      - postgres-network
+    volumes:
+      - ${POSTGRES_PASSWORD}/db-data/:/var/lib/postgresql/data/
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 15433:80
+    env_file:
+      - .env
+    depends_on:
+      - database
+    networks:
+      - postgres-network
+    volumes:
+      - ${POSTGRES_PASSWORD}/pgadmin-data/:/var/lib/pgadmin/
+
+networks:
+  postgres-network:
+    driver: bridge
