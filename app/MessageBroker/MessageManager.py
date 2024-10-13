@@ -1,44 +1,31 @@
 from abc import abstractmethod, ABCMeta
 from typing import List
-from app.MessageBroker.ServiceManager import ServiceManagerInterface
-from app.schemas.Message import Message
-from app.schemas.Error import Error, ErrorMessageEnum
-from app.schemas.ServiceMessage import ServiceMessage
-import asyncio
+from DBMMessageBrokerSDK.ServiceManagerInterface import ServiceManagerInterface
+from DBMMessageBrokerSDK.schemas.Message import Message
+from DBMMessageBrokerSDK.schemas.Error import Error, ErrorMessageEnum
+from DBMMessageBrokerSDK.schemas.ServiceMessage import ServiceMessage
+from DBMMessageBrokerSDK.MessageManagerInterface import MessageManagerInterface
 from datetime import date
-
-class MessageManagerInterface(metaclass=ABCMeta):
-    @abstractmethod
-    def __init__(self) -> None:
-        self.services: List[ServiceManagerInterface] = []
-
-    @abstractmethod
-    def register_service(self, service: ServiceManagerInterface) -> Message:
-        """Register a new service."""
-        raise NotImplementedError
-    
-    @abstractmethod
-    def deregister_service(self, service: ServiceManagerInterface) -> Message:
-        """Deregister a service."""
-        raise NotImplementedError
-    
-    @abstractmethod
-    async def _notify_services(self, message: ServiceMessage):
-        """Notify all services with service name in message."""
-        raise NotImplementedError
-    
-    @abstractmethod
-    async def release_message(self, service: ServiceManagerInterface) -> ServiceMessage:
-        """Validate service, fetch message from db and post to service."""
-        raise NotImplementedError
-    
+from app.core.database import sessionmanager    
+from app.core.queries.create_service import insert_service as insert_service_query
+from app.models.ServiceModels import ServiceModel
+import datetime
+from DBMMessageBrokerSDK.schemas.RegisterNewService import RegisterNewService
 
 class MessageManager(MessageManagerInterface):
     def __init__(self) -> None:
         super().__init__()
 
+    def create_service(self, new_service: RegisterNewService) -> Message:
+        new_service = ServiceModel(
+            service_name=new_service.service_name,
+            create_date=new_service.request_date
+        )
+        insert_service_query(new_service)
+
     def register_service(self, service: ServiceManagerInterface) -> Message:
         try:
+            
             if service not in self.services:
                 self.services.append(service)
                 return Message(message="Service added.")
