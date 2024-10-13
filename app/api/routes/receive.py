@@ -3,21 +3,22 @@ from pydantic.networks import EmailStr
 
 # from app.api.deps import get_current_active_superuser
 from DBMMessageBrokerSDK.schemas.Message import Message
+from DBMMessageBrokerSDK.schemas.ServiceMessage import ServiceMessage
 
 router = APIRouter()
 
-
 @router.post(
-    "/test/",
+    "/",
     # dependencies=[Depends()],
     status_code=201,
 )
-def test(var: str) -> Message:
+def receive_message(msg: ServiceMessage) -> Message:
     """
     Test.
     """
     # Execute logic
-    return Message(message="Test completed")
+    print(msg)
+    return Message(message=f"Sending message to {msg.service_contact}")
 
 
 @router.get("/health-check/")
