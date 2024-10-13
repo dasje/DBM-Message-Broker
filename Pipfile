@@ -9,6 +9,10 @@ uvicorn = "*"
 sentry-sdk = "*"
 pydantic-settings = "*"
 sqlmodel = "*"
+sqlalchemy = "*"
+psycopg2 = "*"
+sqlalchemy-utils = "*"
+asyncpg = "*"
 
 [dev-packages]
 
